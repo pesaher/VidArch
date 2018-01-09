@@ -27,10 +27,10 @@
     <ClCompile Include="..\..\common\sys_win.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\example.cpp">
+    <ClCompile Include="..\..\common\font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\font.cpp">
+    <ClCompile Include="..\..\common\rafting_ice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
