@@ -21,11 +21,13 @@ struct IceCube
 };
 
 #define NUM_RAFTS       3
-#define RAFT_SPEED      8.f
+#define RAFT_SPEED      2.f
 #define CHARACTER_SPEED 8.f
 
 Raft rafts[NUM_RAFTS];
 
+bool overlap(float a0, float a1, float b0, float b1);
+int overlap(Raft r1, Raft r2);
 
 //-----------------------------------------------------------------------------
 int Main(void)
@@ -36,6 +38,7 @@ int Main(void)
   GLuint texBackground = CORE_LoadPNG("data/lava.png",     true);
   GLuint texRaft       = CORE_LoadPNG("data/raft.png",     false);
   GLuint texIceCube    = CORE_LoadPNG("data/ice_cube.png", false);
+  GLuint texFire    = CORE_LoadPNG("data/fire.png", false);
 
   // Init game state
   for (int i = 0; i < NUM_RAFTS; i++)
@@ -58,7 +61,7 @@ int Main(void)
   glLoadIdentity();
   glOrtho( 0.0, SCR_WIDTH, 0.0, SCR_HEIGHT, 0.0, 1.0);
   glEnable(GL_TEXTURE_2D);
-  glEnable(GL_BLEND);
+  //glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   while (!SYS_GottaQuit())
@@ -82,55 +85,49 @@ int Main(void)
    
     SYS_Show();
 
-    // Run balls
-    for (int i = 0; i < NUM_RAFTS; i++)
-    {
-      vec2 oldpos = rafts[i].pos;
-      vec2 newpos = vadd(oldpos, rafts[i].vel);
+    // Run rafts
+	for (int i = 0; i < NUM_RAFTS; i++) {
+		vec2 newpos = vadd(rafts[i].pos, rafts[i].vel);
 
-      bool collision = false;
-      int colliding_ball = -1;
-      for (int j = 0; j < NUM_RAFTS; j++)
-      {
-        if (i != j)
-        {
-          float limit2 = (rafts[i].size.x + rafts[j].size.x) * (rafts[i].size.y + rafts[j].size.y);
-          if (vlen2(vsub(oldpos, rafts[j].pos)) > limit2 && vlen2(vsub(newpos, rafts[j].pos)) <= limit2)
-          {
-            collision = true;
-            colliding_ball = j;
-            break;
-          }
-        }
-      }
+		int colliding_raft = -1;
+		int overlap_type = 0;
+		for (int j = 0; j < NUM_RAFTS; j++)
+		{
+			if (i != j) {
+				overlap_type = overlap(rafts[i], rafts[j]);
+				if (overlap_type){
+					colliding_raft = j;
+					break;
+				}
+			}
+		}
 
-      if (!collision)
-		  rafts[i].pos = newpos;
-      else
-      {
-        // Rebound!
-		  rafts[i].vel = vscale(rafts[i].vel, -1.f);
-		  rafts[colliding_ball].vel = vscale(rafts[colliding_ball].vel, -1.f);
-      }
+		if (!overlap_type)
+			rafts[i].pos = newpos;
+		else {
+			// Rebound!
+			rafts[i].vel = vscale(rafts[i].vel, -1.f);
+			rafts[i].pos = vadd(rafts[i].pos, rafts[i].vel);
+			rafts[colliding_raft].vel = vscale(rafts[colliding_raft].vel, -1.f);
+			rafts[colliding_raft].pos = vadd(rafts[colliding_raft].pos, rafts[colliding_raft].vel);
+		}
 
-      // Rebound on margins
-      if (rafts[i].vel.x > 0.0)
-      {
-        if (rafts[i].pos.x > SCR_WIDTH)
-			rafts[i].vel.x *= -1.0;
-      } else {
-        if (rafts[i].pos.x < 0)
-			rafts[i].vel.x *= -1.0;
-      }
-      if (rafts[i].vel.y > 0.0)
-      {
-        if (rafts[i].pos.y > SCR_HEIGHT)
-			rafts[i].vel.y *= -1.0;
-      } else {
-        if (rafts[i].pos.y < 0)
-			rafts[i].vel.y *= -1.0;
-      }
-    }
+		// Rebound on margins
+		if (rafts[i].vel.x > 0.0) {
+			if (rafts[i].pos.x + rafts[i].size.x > SCR_WIDTH)
+				rafts[i].vel.x *= -1.0;
+		} else {
+			if (rafts[i].pos.x < 0)
+				rafts[i].vel.x *= -1.0;
+		}
+		if (rafts[i].vel.y > 0.0) {
+			if (rafts[i].pos.y + rafts[i].size.y > SCR_HEIGHT)
+				rafts[i].vel.y *= -1.0;
+		} else {
+			if (rafts[i].pos.y < 0)
+				rafts[i].vel.y *= -1.0;
+		}
+	}
    
     // Keep system running
     SYS_Pump();
@@ -140,7 +137,34 @@ int Main(void)
   CORE_UnloadPNG(texBackground);
   CORE_UnloadPNG(texRaft);
   CORE_UnloadPNG(texIceCube);
+  CORE_UnloadPNG(texFire);
   FONT_End();
 
   return 0;
+}
+
+bool overlap(float a0, float a1, float b0, float b1) {
+	bool overlapResult = false;
+	if (a0 <= b0) {
+		if (a1 >= b0)
+			overlapResult = true;
+	}
+	else if (b1 >= a0)
+		overlapResult = true;
+	return overlapResult;
+}
+
+int overlap(Raft r1, Raft r2) {
+	int overlapResult = 0;
+	if (overlap(r1.pos.x, r1.pos.x + r1.size.x, r2.pos.x, r2.pos.x + r2.size.x)
+		&&
+		overlap(r1.pos.y, r1.pos.y + r1.size.y, r2.pos.y, r2.pos.y + r2.size.y)) {
+		if ((r1.vel.x > 0 && r2.vel.x < 0) || (r1.vel.x < 0 && r2.vel.x > 0))
+			overlapResult = 1;
+		else if ((r1.vel.y > 0 && r2.vel.y < 0) || (r1.vel.y < 0 && r2.vel.y > 0))
+			overlapResult = 2;
+		else
+			overlapResult = 3;
+	}
+	return overlapResult;
 }
