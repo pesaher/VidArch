@@ -164,10 +164,25 @@ int Main(void)
 				if (!overlap_type)
 					rafts[i].pos = newpos;
 				else {
-					// Rebound!
-					rafts[i].vel = vscale(rafts[i].vel, -1.f);
+					if (overlap_type == 1) {
+						rafts[i].vel = vmake(-rafts[i].vel.x, rafts[i].vel.y);
+						rafts[colliding_raft].vel = vmake(-rafts[colliding_raft].vel.x, rafts[colliding_raft].vel.y);
+					} else if (overlap_type == 2) {
+						rafts[i].vel = vmake(-rafts[i].vel.x, rafts[i].vel.y);
+					} else if (overlap_type == 3) {
+						rafts[colliding_raft].vel = vmake(-rafts[colliding_raft].vel.x, rafts[colliding_raft].vel.y);
+					} else if (overlap_type == 4) {
+						rafts[i].vel = vmake(rafts[i].vel.x, -rafts[i].vel.y);
+						rafts[colliding_raft].vel = vmake(rafts[colliding_raft].vel.x, -rafts[colliding_raft].vel.y);
+					} else if (overlap_type == 5) {
+						rafts[i].vel = vmake(rafts[i].vel.x, -rafts[i].vel.y);
+					} else if (overlap_type == 6) {
+						rafts[colliding_raft].vel = vmake(rafts[colliding_raft].vel.x, -rafts[colliding_raft].vel.y);
+					} else if (overlap_type == 7) {
+						rafts[i].vel = vscale(rafts[i].vel, -1.f);
+						rafts[colliding_raft].vel = vscale(rafts[colliding_raft].vel, -1.f);
+					}
 					rafts[i].pos = vadd(rafts[i].pos, vscale(rafts[i].vel, deltaTime));
-					rafts[colliding_raft].vel = vscale(rafts[colliding_raft].vel, -1.f);
 					rafts[colliding_raft].pos = vadd(rafts[colliding_raft].pos, vscale(rafts[colliding_raft].vel, deltaTime));
 				}
 
@@ -201,6 +216,7 @@ int Main(void)
 								}
 					}
 					rafts[i].state = SAFE;
+					rafts[i].vel = vmake(CORE_FRand(-RAFT_SPEED, +RAFT_SPEED), CORE_FRand(-RAFT_SPEED, +RAFT_SPEED));
 				}
 
 			// Sink rafts and check game over
@@ -248,17 +264,50 @@ bool overlap(float a0, float a1, float b0, float b1) {
 	return overlapResult;
 }
 
+//int overlap(Raft r1, Raft r2) {
+//	int overlapResult = 0;
+//	if (overlap(r1.pos.x, r1.pos.x + r1.size.x, r2.pos.x, r2.pos.x + r2.size.x)
+//		&&
+//		overlap(r1.pos.y, r1.pos.y + r1.size.y, r2.pos.y, r2.pos.y + r2.size.y)) {
+//		if ((r1.vel.x > 0 && r2.vel.x < 0) || (r1.vel.x < 0 && r2.vel.x > 0))
+//			overlapResult = 1;
+//		else if ((r1.vel.y > 0 && r2.vel.y < 0) || (r1.vel.y < 0 && r2.vel.y > 0))
+//			overlapResult = 2;
+//		else if (abs(r1.vel.x) > abs(r2.vel.x) && abs(r1.vel.y) > abs(r2.vel.y))
+//			overlapResult = 3;
+//		else if (abs(r1.vel.x) < abs(r2.vel.x) && abs(r1.vel.y) < abs(r2.vel.y))
+//			overlapResult = 4;
+//		else
+//			overlapResult = 5;
+//	}
+//	return overlapResult;
+//}
+
 int overlap(Raft r1, Raft r2) {
 	int overlapResult = 0;
 	if (overlap(r1.pos.x, r1.pos.x + r1.size.x, r2.pos.x, r2.pos.x + r2.size.x)
 		&&
 		overlap(r1.pos.y, r1.pos.y + r1.size.y, r2.pos.y, r2.pos.y + r2.size.y)) {
-		if ((r1.vel.x > 0 && r2.vel.x < 0) || (r1.vel.x < 0 && r2.vel.x > 0))
-			overlapResult = 1;
-		else if ((r1.vel.y > 0 && r2.vel.y < 0) || (r1.vel.y < 0 && r2.vel.y > 0))
-			overlapResult = 2;
+		float horizontalDistance = abs(abs(r1.pos.x - r2.pos.x) - r1.size.x);
+		float verticalDistance = abs(abs(r1.pos.y - r2.pos.y) - r1.size.y);
+		if (verticalDistance > horizontalDistance) {
+			if (r1.vel.x > 0 && r2.vel.x < 0 || r1.vel.x < 0 && r2.vel.x > 0)
+				overlapResult = 1;
+			else if (abs(r1.vel.x) > abs(r2.vel.x))
+				overlapResult = 2;
+			else
+				overlapResult = 3;
+		}
+		else if (verticalDistance < horizontalDistance) {
+			if (r1.vel.y > 0 && r2.vel.y < 0 || r1.vel.y < 0 && r2.vel.y > 0)
+				overlapResult = 4;
+			else if (abs(r1.vel.y) > abs(r2.vel.y))
+				overlapResult = 5;
+			else
+				overlapResult = 6;
+		}
 		else
-			overlapResult = 3;
+			overlapResult = 7;
 	}
 	return overlapResult;
 }
