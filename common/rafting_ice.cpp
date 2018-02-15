@@ -62,13 +62,13 @@ int Main(void)
 	}
 
 	Character iceCube;
-	iceCube.pos = rafts[0].pos;
 	iceCube.size = { 50.f, 50.f };
+	iceCube.pos = vmake(CORE_FRand(0.0, SCR_WIDTH - iceCube.size.x), CORE_FRand(0.0, SCR_HEIGHT - iceCube.size.y));
 	iceCube.gfx = texIceCube;
 
 	Character fire;
-	fire.pos = { 250.f, 30.f };
 	fire.size = { 75.f, 75.f };
+	fire.pos = vmake(CORE_FRand(0.0, SCR_WIDTH - fire.size.x), CORE_FRand(0.0, SCR_HEIGHT - fire.size.y));
 	fire.gfx = texFire;
 	
 	// Set up rendering
@@ -90,6 +90,7 @@ int Main(void)
 	long int score = 0;
 	
 	while (!SYS_GottaQuit()) {
+
 		// Compute delta time
 		auto currentTime = timer.now();
 		using ms = std::chrono::duration<float, std::milli>;
