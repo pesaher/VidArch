@@ -132,11 +132,11 @@ int Main(void)
 		} else if (gameState == PLAYING) {
 
 			// Text
-			FONT_DrawString(vmake(SCR_WIDTH / 2 - getDigits(score) * 8, 16), std::to_string(static_cast<int>(ceil(score))).c_str());
+			FONT_DrawString(vmake(static_cast<float>(SCR_WIDTH / 2 - getDigits(score) * 8), 16.f), std::to_string(static_cast<int>(ceil(score))).c_str());
 
 			// Logic preparation
 			bool safe = false;
-			score += deltaTime;
+			score += static_cast<long>(deltaTime);
 
 			// Move player
 			moveCharacter(iceCube, deltaTime);
@@ -256,7 +256,7 @@ int Main(void)
 
 			// Text
 			FONT_DrawString(vmake(SCR_WIDTH / 2 - 5 * 16, SCR_HEIGHT / 2), "GAME OVER!");
-			FONT_DrawString(vmake(SCR_WIDTH / 2 - getDigits(score) * 8, 16), std::to_string(static_cast<int>(ceil(score))).c_str());
+			FONT_DrawString(vmake(static_cast<float>(SCR_WIDTH / 2 - getDigits(score) * 8), 16.f), std::to_string(static_cast<int>(ceil(score))).c_str());
 		}
 
 		glDisable(GL_BLEND);
