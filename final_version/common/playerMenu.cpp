@@ -34,4 +34,8 @@ void CPlayerMenu::manageMessage(CMessage* message)
 			m_globalBroadcaster->broadcastMessage(&changeStateMessage);
 		}
 	}
+	// Make the ice cube in the menu invincible (set DPS to 0)
+	CMessageDamage damageMessage;
+	for (IBroadcaster* broadcaster : m_childBroadcasters)
+		broadcaster->broadcastMessage(&damageMessage);
 }
