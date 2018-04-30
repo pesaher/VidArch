@@ -1,0 +1,10 @@
+{
+  "level1": {
+    "number_of_rafts": 3,
+    "background"     : "data/water.png"
+  },
+  "level2": {
+    "number_of_rafts": 2,
+    "background"     : "data/lava.png"
+  }
+}

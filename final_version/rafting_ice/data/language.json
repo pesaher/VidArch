@@ -1,0 +1,23 @@
+{
+  "english": {
+    "play"     : "PLAY",
+    "languages": "LANGUAGES",
+    "exit"     : "EXIT",
+    "easy"     : "EASY",
+    "hard"     : "HARD",
+    "back"     : "BACK",
+    "english"  : "ENGLISH",
+    "spanish"  : "SPANISH"
+
+  },
+  "spanish": {
+    "play"     : "JUGAR",
+    "languages": "IDIOMAS",
+    "exit"     : "SALIR",
+    "easy"     : "FACIL",
+    "hard"     : "DIFICIL",
+    "back"     : "ATRAS",
+    "english"  : "NO HABLA SPAGNOLO",
+    "spanish"  : "VIVA EL VINO"
+  }
+}
